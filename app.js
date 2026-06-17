@@ -86,9 +86,6 @@ let state = {
   },
 };
 
-/* ── Pinyin hint ─────────────────────────────────────────────────── */
-let pinyinHintDismissed = localStorage.getItem('cccc-pinyin-hint') === '1';
-
 /* ── Firebase state ──────────────────────────────────────────────── */
 let firebaseAuth = null;
 let firebaseDb   = null;
@@ -440,10 +437,14 @@ function renderCard() {
   const catEn  = catLabel(card.category);
   const subcatEn = catLabel(card.subcategory);
   const catBadge = document.getElementById('front-category');
-  catBadge.innerHTML = card.category
+  const categoryMarkup = card.category
     ? `<span class="front-category-zh">${card.category} &middot; ${card.subcategory}</span>
        <span class="front-category-en">${catEn} &middot; ${subcatEn}</span>`
     : '';
+  catBadge.innerHTML = categoryMarkup;
+  document.getElementById('mobile-card-category').innerHTML = categoryMarkup;
+  document.getElementById('mobile-card-pinyin').textContent = card.pinyin;
+  document.getElementById('front-char').classList.toggle('compact', card.char.length >= 3);
 
   // Back
   document.getElementById('back-char').textContent    = card.char;
@@ -460,9 +461,6 @@ function renderCard() {
   setFlipped(false);
   setPinyinVisible(false);
 
-  // Show/hide pinyin hint
-  document.getElementById('pinyin-hint')?.classList.toggle('dismissed', pinyinHintDismissed);
-
   // Nav buttons
   document.getElementById('prev-btn').disabled = state.index === 0;
 
@@ -475,22 +473,20 @@ function setFlipped(val) {
   state.isFlipped = val;
   const inner = document.getElementById('card-inner');
   inner.classList.toggle('is-flipped', val);
+  setPinyinVisible(false);
 }
 
 function setPinyinVisible(val) {
   state.showPinyin = val;
   const pinyin = document.getElementById('front-pinyin');
+  const mobilePinyin = document.getElementById('mobile-card-pinyin');
   const btn    = document.getElementById('pinyin-btn');
-  pinyin.classList.toggle('visible', val);
+  const visible = val && !state.isFlipped;
+  pinyin.classList.toggle('visible', visible);
+  mobilePinyin.classList.toggle('visible', visible);
   btn.classList.toggle('revealed', val);
   btn.innerHTML = val ? ICON.eyeOff : ICON.eye;
   btn.setAttribute('aria-label', val ? 'Hide pinyin' : 'Show pinyin');
-
-  if (val && !pinyinHintDismissed) {
-    pinyinHintDismissed = true;
-    localStorage.setItem('cccc-pinyin-hint', '1');
-    document.getElementById('pinyin-hint')?.classList.add('dismissed');
-  }
 }
 
 /* ── Navigation ──────────────────────────────────────────────────── */
