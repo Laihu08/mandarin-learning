@@ -78,10 +78,11 @@ let state = {
   isShuffled: false,
   todayCount: 0,
   todayDate: '',
+  reviewMode: false,
   progress: {
-    beginner:     { known: new Set(), review: new Set(), lastIndex: 0, category: null },
-    intermediate: { known: new Set(), review: new Set(), lastIndex: 0, category: null },
-    advanced:     { known: new Set(), review: new Set(), lastIndex: 0, category: null },
+    beginner:     { known: new Set(), review: new Set(), lastIndex: 0, category: null, skipKnown: false },
+    intermediate: { known: new Set(), review: new Set(), lastIndex: 0, category: null, skipKnown: false },
+    advanced:     { known: new Set(), review: new Set(), lastIndex: 0, category: null, skipKnown: false },
   },
 };
 
@@ -122,10 +123,11 @@ function saveLocal() {
   for (const lvl of ['beginner', 'intermediate', 'advanced']) {
     const p = state.progress[lvl];
     data.progress[lvl] = {
-      known:     [...p.known],
-      review:    [...p.review],
-      lastIndex: p.lastIndex,
-      category:  p.category,
+      known:      [...p.known],
+      review:     [...p.review],
+      lastIndex:  p.lastIndex,
+      category:   p.category,
+      skipKnown:  p.skipKnown,
     };
   }
   try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch (_) {}
@@ -142,10 +144,11 @@ function loadLocal() {
     for (const lvl of ['beginner', 'intermediate', 'advanced']) {
       if (data.progress?.[lvl]) {
         const p = data.progress[lvl];
-        state.progress[lvl].known     = new Set(p.known || []);
-        state.progress[lvl].review    = new Set(p.review || []);
-        state.progress[lvl].lastIndex = p.lastIndex || 0;
-        state.progress[lvl].category  = p.category || null;
+        state.progress[lvl].known      = new Set(p.known || []);
+        state.progress[lvl].review     = new Set(p.review || []);
+        state.progress[lvl].lastIndex  = p.lastIndex || 0;
+        state.progress[lvl].category   = p.category || null;
+        state.progress[lvl].skipKnown  = p.skipKnown || false;
       }
     }
   } catch (_) {}
@@ -164,10 +167,11 @@ async function loadFirestoreProgress(uid) {
     for (const lvl of ['beginner', 'intermediate', 'advanced']) {
       if (data.progress?.[lvl]) {
         const p = data.progress[lvl];
-        state.progress[lvl].known     = new Set(p.known || []);
-        state.progress[lvl].review    = new Set(p.review || []);
-        state.progress[lvl].lastIndex = p.lastIndex || 0;
-        state.progress[lvl].category  = p.category || null;
+        state.progress[lvl].known      = new Set(p.known || []);
+        state.progress[lvl].review     = new Set(p.review || []);
+        state.progress[lvl].lastIndex  = p.lastIndex || 0;
+        state.progress[lvl].category   = p.category || null;
+        state.progress[lvl].skipKnown  = p.skipKnown || false;
       }
     }
     saveLocal();
@@ -268,10 +272,14 @@ function showSync(msg) {
 }
 
 /* ── Build deck ──────────────────────────────────────────────────── */
-function buildDeck(level, category) {
+function buildDeck(level, category, reviewOnly = false) {
   let cards = vocab.levels[level] || [];
-  if (category) {
-    cards = cards.filter(c => c.category === category);
+  if (category) cards = cards.filter(c => c.category === category);
+  const known = state.progress[level].known;
+  if (reviewOnly) {
+    cards = cards.filter(c => known.has(c.id));
+  } else if (state.progress[level].skipKnown) {
+    cards = cards.filter(c => !known.has(c.id));
   }
   return cards;
 }
@@ -314,34 +322,63 @@ function renderHome() {
   for (const [levelKey, meta] of Object.entries(LEVEL_META)) {
     const cards    = vocab.levels[levelKey] || [];
     const progress = state.progress[levelKey];
-    const known    = progress.known.size;
+    const knownAll = progress.known.size;
     const total    = cards.length;
 
-    const categories = [...new Set(cards.map(c => c.category).filter(Boolean))];
+    // Per-category counts
+    const catStats = {};
+    cards.forEach(c => {
+      if (!c.category) return;
+      if (!catStats[c.category]) catStats[c.category] = { total: 0, known: 0 };
+      catStats[c.category].total++;
+      if (progress.known.has(c.id)) catStats[c.category].known++;
+    });
 
-    const savedCat = progress.category;
+    const categories = [...new Set(cards.map(c => c.category).filter(Boolean))];
+    const savedCat   = progress.category;
+
+    const percent = total > 0 ? Math.round(knownAll / total * 100) : 0;
 
     const card = document.createElement('div');
     card.className = 'level-card';
     card.innerHTML = `
-      <div class="level-header">
-        <span class="level-zh">${meta.zh}</span>
-        <span class="level-en">${meta.en} &middot; ${meta.sub}</span>
-      </div>
-      <div class="level-stats">
-        <span class="stat-known">${known}</span>
-        <span class="stat-sep">/</span>
-        <span class="stat-total">${total}</span>
-        <span class="stat-label">learned</span>
-      </div>
-      <div class="category-filter-wrap">
-        <span class="cat-filter-label">Category</span>
-        <div class="category-pills" data-level="${levelKey}">
-          <button class="cat-pill${!savedCat ? ' active' : ''}" data-cat="">All</button>
-          ${categories.map(c => `<button class="cat-pill${savedCat === c ? ' active' : ''}" data-cat="${c}">${c} - ${catLabel(c)}</button>`).join('')}
+      <div class="level-card-top">
+        <div class="level-header">
+          <div class="level-name-group">
+            <span class="level-zh">${meta.zh}</span>
+            <span class="level-en">${meta.en} &middot; ${meta.sub}</span>
+          </div>
+          <div class="level-stat-block">
+            <div class="stat-fraction">
+              <span class="stat-known">${knownAll}</span><span class="stat-denom">/${total}</span>
+            </div>
+            <span class="stat-label">learned</span>
+          </div>
+        </div>
+        <div class="level-mini-bar">
+          <div class="level-mini-fill" style="width:${percent}%"></div>
         </div>
       </div>
-      <button class="start-btn" data-level="${levelKey}">Start Studying</button>
+      <div class="category-filter-wrap">
+        <div class="cat-filter-header">
+          <span class="cat-filter-label">Category</span>
+          <label class="skip-toggle">
+            <input type="checkbox" class="skip-checkbox" ${progress.skipKnown ? 'checked' : ''}>
+            <span class="skip-label">Skip learned</span>
+          </label>
+        </div>
+        <div class="category-pills" data-level="${levelKey}">
+          <button class="cat-pill${!savedCat ? ' active' : ''}" data-cat="">All <span class="pill-count">${knownAll}/${total}</span></button>
+          ${categories.map(c => {
+            const s = catStats[c] || { total: 0, known: 0 };
+            return `<button class="cat-pill${savedCat === c ? ' active' : ''}" data-cat="${c}">${c} - ${catLabel(c)} <span class="pill-count">${s.known}/${s.total}</span></button>`;
+          }).join('')}
+        </div>
+      </div>
+      <div class="level-actions">
+        <button class="start-btn">Start Studying</button>
+        <button class="review-btn" ${knownAll === 0 ? 'disabled' : ''}>Review${knownAll > 0 ? ` (${knownAll})` : ''}</button>
+      </div>
     `;
     grid.appendChild(card);
 
@@ -355,11 +392,24 @@ function renderHome() {
       });
     });
 
+    // Skip toggle
+    card.querySelector('.skip-checkbox').addEventListener('change', e => {
+      state.progress[levelKey].skipKnown = e.target.checked;
+      saveLocal();
+    });
+
     // Start button
     card.querySelector('.start-btn').addEventListener('click', () => {
       const activePill = card.querySelector('.cat-pill.active');
       const cat = activePill?.dataset.cat || null;
-      startLevel(levelKey, cat || null);
+      startLevel(levelKey, cat || null, false);
+    });
+
+    // Review button
+    card.querySelector('.review-btn').addEventListener('click', () => {
+      const activePill = card.querySelector('.cat-pill.active');
+      const cat = activePill?.dataset.cat || null;
+      startLevel(levelKey, cat || null, true);
     });
   }
 }
@@ -374,10 +424,11 @@ function renderCard() {
   const known     = state.progress[state.level].known.size;
 
   // Progress
-  const fill    = total > 0 ? ((state.index + 1) / total) * 100 : 0;
+  const fill = total > 0 ? ((state.index + 1) / total) * 100 : 0;
   document.getElementById('progress-fill').style.width = fill + '%';
-  document.getElementById('progress-label').textContent =
-    `${known} / ${state.deck.length} in ${levelMeta.zh}`;
+  document.getElementById('progress-label').textContent = state.reviewMode
+    ? `Reviewing learned · ${state.index + 1} of ${total} in ${levelMeta.zh}`
+    : `${known} / ${total} in ${levelMeta.zh}`;
 
   // Front
   document.getElementById('front-char').textContent = card.char;
@@ -431,22 +482,29 @@ function setPinyinVisible(val) {
 }
 
 /* ── Navigation ──────────────────────────────────────────────────── */
-function startLevel(level, category) {
-  state.level    = level;
-  state.category = category;
-  state.todayDate = todayKey();
-
-  let deck = buildDeck(level, category);
+function startLevel(level, category, reviewOnly = false) {
+  let deck = buildDeck(level, category, reviewOnly);
   if (state.isShuffled) deck = shuffleDeck(deck);
 
+  if (deck.length === 0) {
+    showSync(reviewOnly ? 'No learned cards in this set' : 'All cards learned here!');
+    return;
+  }
+
+  state.level      = level;
+  state.category   = category;
+  state.reviewMode = reviewOnly;
+  state.todayDate  = todayKey();
   state.deck        = deck;
   state.reviewQueue = [];
   state.index       = 0;
 
-  // Restore last index if same level + category
-  const saved = state.progress[level];
-  if (saved.category === category && saved.lastIndex < deck.length) {
-    state.index = saved.lastIndex;
+  // Restore position only for regular study, not review sessions
+  if (!reviewOnly) {
+    const saved = state.progress[level];
+    if (saved.category === category && saved.lastIndex < deck.length) {
+      state.index = saved.lastIndex;
+    }
   }
 
   showCardScreen();

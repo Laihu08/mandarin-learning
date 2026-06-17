@@ -271,7 +271,7 @@ button:focus-visible {
    Home screen
 ───────────────────────────────────────────── */
 #home-screen {
-  padding: 32px 16px 48px;
+  padding: 28px 16px 48px;
   min-height: calc(100dvh - 61px);
 }
 
@@ -285,13 +285,13 @@ button:focus-visible {
   font-size: 22px;
   font-weight: 700;
   color: var(--text-1);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .home-subheading {
   font-size: 14px;
   color: var(--text-2);
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .level-grid {
@@ -307,16 +307,15 @@ button:focus-visible {
 }
 
 /* ─────────────────────────────────────────────
-   Level cards (home)
+   Level cards
 ───────────────────────────────────────────── */
 .level-card {
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  overflow: hidden;
   box-shadow: var(--shadow-sm);
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
@@ -326,89 +325,140 @@ button:focus-visible {
   border-color: var(--border-strong);
 }
 
+/* Top block: level name + stat + mini progress bar */
+.level-card-top {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
 .level-header {
   display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.level-name-group {
+  display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .level-zh {
   font-family: 'Noto Serif TC', serif;
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--text-1);
   letter-spacing: 0.02em;
+  line-height: 1.2;
 }
 
 .level-en {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-2);
 }
 
-.level-stats {
+.level-stat-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+.stat-fraction {
   display: flex;
   align-items: baseline;
-  gap: 4px;
 }
 
 .stat-known {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 700;
   color: var(--accent);
   font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
 
-.stat-sep {
-  font-size: 18px;
-  color: var(--text-3);
-}
-
-.stat-total {
-  font-size: 18px;
+.stat-denom {
+  font-size: 15px;
   color: var(--text-3);
   font-variant-numeric: tabular-nums;
 }
 
 .stat-label {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-3);
-  margin-left: 4px;
+}
+
+/* Thin progress bar inside card */
+.level-mini-bar {
+  height: 4px;
+  background: var(--border);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.level-mini-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: var(--radius-pill);
+  transition: width 0.4s ease;
 }
 
 /* ─────────────────────────────────────────────
-   Category filter (home)
+   Category filter
 ───────────────────────────────────────────── */
 .category-filter-wrap {
+  padding: 14px 20px 16px;
   display: flex;
   flex-direction: column;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cat-filter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 8px;
 }
 
 .cat-filter-label {
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-3);
 }
 
+/* Horizontal scrollable pills - no wrapping */
 .category-pills {
   display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 6px;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.category-pills::-webkit-scrollbar {
+  display: none;
 }
 
 .cat-pill {
-  padding: 4px 10px;
+  padding: 5px 11px;
   border-radius: var(--radius-pill);
   font-size: 12px;
   font-weight: 500;
   border: 1px solid var(--border);
   color: var(--text-2);
   background: var(--surface);
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   white-space: nowrap;
+  flex-shrink: 0;
   line-height: 1.4;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .cat-pill:hover {
@@ -422,16 +472,80 @@ button:focus-visible {
   color: var(--accent);
 }
 
+.pill-count {
+  font-size: 10px;
+  font-weight: 400;
+  opacity: 0.65;
+  margin-left: 3px;
+}
+
 /* ─────────────────────────────────────────────
-   Start button
+   Skip learned - pill toggle switch
 ───────────────────────────────────────────── */
+.skip-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.skip-toggle input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 32px;
+  height: 18px;
+  border-radius: 9px;
+  background: var(--border-strong);
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s ease;
+}
+
+.skip-toggle input[type="checkbox"]::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  top: 2px;
+  left: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.skip-toggle input[type="checkbox"]:checked {
+  background: var(--accent);
+}
+
+.skip-toggle input[type="checkbox"]:checked::after {
+  transform: translateX(14px);
+}
+
+.skip-label {
+  font-size: 11px;
+  color: var(--text-2);
+}
+
+/* ─────────────────────────────────────────────
+   Level action buttons
+───────────────────────────────────────────── */
+.level-actions {
+  display: flex;
+  gap: 8px;
+  padding: 14px 20px;
+}
+
 .start-btn {
-  margin-top: 4px;
+  flex: 1;
   height: 44px;
   border-radius: var(--radius-sm);
   background: var(--accent);
   color: var(--accent-fg);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.02em;
   transition: opacity 0.15s ease, transform 0.1s ease;
@@ -443,6 +557,33 @@ button:focus-visible {
 
 .start-btn:active {
   transform: scale(0.98);
+}
+
+.review-btn {
+  height: 44px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--accent-muted2);
+  white-space: nowrap;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.review-btn:hover {
+  background: var(--accent-muted);
+}
+
+.review-btn:active {
+  transform: scale(0.98);
+}
+
+.review-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
 }
 
 /* ─────────────────────────────────────────────
@@ -759,8 +900,9 @@ button:focus-visible {
 }
 
 .again-btn:hover {
-  background: var(--accent-muted);
-  border-color: var(--again-border);
+  background: rgba(192, 64, 64, 0.1);
+  border-color: rgba(192, 64, 64, 0.35);
+  color: var(--again-color);
 }
 
 .known-btn {
@@ -769,8 +911,9 @@ button:focus-visible {
 }
 
 .known-btn:hover {
-  background: var(--accent-muted);
-  border-color: var(--known-border);
+  background: rgba(42, 128, 64, 0.1);
+  border-color: rgba(42, 128, 64, 0.35);
+  color: var(--known-color);
 }
 
 /* ─────────────────────────────────────────────
