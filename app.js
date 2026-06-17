@@ -86,6 +86,9 @@ let state = {
   },
 };
 
+/* ── Pinyin hint ─────────────────────────────────────────────────── */
+let pinyinHintDismissed = localStorage.getItem('cccc-pinyin-hint') === '1';
+
 /* ── Firebase state ──────────────────────────────────────────────── */
 let firebaseAuth = null;
 let firebaseDb   = null;
@@ -457,6 +460,9 @@ function renderCard() {
   setFlipped(false);
   setPinyinVisible(false);
 
+  // Show/hide pinyin hint
+  document.getElementById('pinyin-hint')?.classList.toggle('dismissed', pinyinHintDismissed);
+
   // Nav buttons
   document.getElementById('prev-btn').disabled = state.index === 0;
 
@@ -479,6 +485,12 @@ function setPinyinVisible(val) {
   btn.classList.toggle('revealed', val);
   btn.innerHTML = val ? ICON.eyeOff : ICON.eye;
   btn.setAttribute('aria-label', val ? 'Hide pinyin' : 'Show pinyin');
+
+  if (val && !pinyinHintDismissed) {
+    pinyinHintDismissed = true;
+    localStorage.setItem('cccc-pinyin-hint', '1');
+    document.getElementById('pinyin-hint')?.classList.add('dismissed');
+  }
 }
 
 /* ── Navigation ──────────────────────────────────────────────────── */

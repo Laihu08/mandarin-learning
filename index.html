@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="CCCC flashcard app for the Taiwan Children's Chinese Competency Certificate vocabulary list.">
-  <title>兒童華語 &middot; CCCC Flashcards</title>
+  <title>Mandarin Flashcards</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,11 +24,7 @@
     <div class="header-inner">
       <div class="header-left">
         <button id="back-btn" class="icon-btn hidden" aria-label="Back to levels"></button>
-        <h1 class="app-title">
-          <span class="title-zh">兒童華語</span>
-          <span class="title-sep">&middot;</span>
-          <span class="title-en">CCCC Flashcards</span>
-        </h1>
+        <h1 class="app-title">Mandarin Flashcards</h1>
       </div>
       <div class="header-right">
         <button id="shuffle-btn" class="icon-btn hidden" aria-label="Toggle shuffle" title="Shuffle cards"></button>
@@ -58,38 +54,46 @@
     </div>
     <p class="progress-label" id="progress-label" aria-live="polite"></p>
 
-    <!-- Card -->
-    <div class="card-scene" id="card-scene" aria-label="Flashcard">
-      <div class="card-inner" id="card-inner" role="button" tabindex="0" aria-label="Tap to flip card">
-
-        <!-- Front face -->
-        <div class="card-face card-front" aria-hidden="false">
-          <div class="front-category-badge" id="front-category" aria-label="Category"></div>
-          <div class="char-display" id="front-char" lang="zh-Hant"></div>
-          <div class="front-pinyin" id="front-pinyin" aria-live="polite"></div>
-          <button class="pinyin-btn" id="pinyin-btn" aria-label="Show pinyin"></button>
-        </div>
-
-        <!-- Back face -->
-        <div class="card-face card-back" aria-hidden="true">
-          <div class="back-char" id="back-char" lang="zh-Hant"></div>
-          <div class="back-pinyin" id="back-pinyin"></div>
-          <div class="back-english" id="back-english" lang="en"></div>
-          <div class="back-meta">
-            <span class="pos-badge" id="back-pos"></span>
-            <div class="back-category" id="back-category"></div>
-          </div>
-        </div>
-
-      </div>
-    </div><!-- /card-scene -->
-
-    <!-- Actions -->
-    <div class="card-actions" role="group" aria-label="Card actions">
+    <!-- Card + side arrows -->
+    <div class="card-nav-wrap">
       <button class="action-btn nav-btn" id="prev-btn" aria-label="Previous card" title="Previous (←)"></button>
+
+      <div class="card-scene" id="card-scene" aria-label="Flashcard">
+        <div class="card-inner" id="card-inner" role="button" tabindex="0" aria-label="Tap to flip card">
+
+          <!-- Front face -->
+          <div class="card-face card-front" aria-hidden="false">
+            <div class="front-category-badge" id="front-category" aria-label="Category"></div>
+            <div class="char-display" id="front-char" lang="zh-Hant"></div>
+            <div class="front-pinyin" id="front-pinyin" aria-live="polite"></div>
+            <div class="pinyin-hint" id="pinyin-hint">
+              <span class="hint-text">tap to reveal pinyin</span>
+              <span class="hint-arrow">&#8594;</span>
+            </div>
+            <button class="pinyin-btn" id="pinyin-btn" aria-label="Show pinyin"></button>
+          </div>
+
+          <!-- Back face -->
+          <div class="card-face card-back" aria-hidden="true">
+            <div class="back-char" id="back-char" lang="zh-Hant"></div>
+            <div class="back-pinyin" id="back-pinyin"></div>
+            <div class="back-english" id="back-english" lang="en"></div>
+            <div class="back-meta">
+              <span class="pos-badge" id="back-pos"></span>
+              <div class="back-category" id="back-category"></div>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- /card-scene -->
+
+      <button class="action-btn nav-btn" id="next-btn" aria-label="Next card" title="Next (→)"></button>
+    </div><!-- /card-nav-wrap -->
+
+    <!-- Again / Known -->
+    <div class="card-actions" role="group" aria-label="Card actions">
       <button class="action-btn again-btn" id="again-btn" aria-label="Mark as didn't know" title="Didn't know (1)">Again</button>
       <button class="action-btn known-btn" id="known-btn" aria-label="Mark as known" title="I know it (2)">Known</button>
-      <button class="action-btn nav-btn" id="next-btn" aria-label="Next card" title="Next (→)"></button>
     </div>
 
     <p class="today-counter" id="today-counter" aria-live="polite"></p>
