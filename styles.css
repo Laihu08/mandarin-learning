@@ -859,6 +859,10 @@ button:focus-visible {
 }
 
 @media (max-width: 639px) {
+  .card-column {
+    padding-bottom: 44px;
+  }
+
   .card-front {
     padding: 24px 92px 24px 24px;
   }
@@ -892,23 +896,27 @@ button:focus-visible {
   }
 
   .mobile-card-pinyin {
-    display: block;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
     position: absolute;
-    top: calc(100% + 8px);
+    top: 100%;
     left: 50%;
+    min-height: 36px;
     width: max-content;
     max-width: calc(100% - 12px);
     transform: translate(-50%, -6px);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
+    z-index: 3;
     font-size: clamp(18px, 5.4vw, 22px);
     font-weight: 600;
     letter-spacing: 0.04em;
     color: var(--accent);
     text-align: center;
-    white-space: nowrap;
-    line-height: 1.1;
+    white-space: normal;
+    line-height: 1.2;
     transition:
       opacity 180ms ease-out,
       transform 220ms ease-out,
@@ -1035,20 +1043,6 @@ button:focus-visible {
 }
 
 @media (max-width: 639px) {
-  .card-actions {
-    max-width: 100%;
-    gap: 12px;
-    margin-top: 20px;
-  }
-
-  .again-btn,
-  .known-btn {
-    height: 56px;
-    font-size: 18px;
-    font-weight: 600;
-    border-radius: 14px;
-  }
-
   #next-btn:not(:disabled) {
     animation: nudge-right 1.6s ease-in-out infinite;
   }
