@@ -123,8 +123,17 @@
   <!-- Sync indicator -->
   <div class="sync-indicator" id="sync-indicator" aria-live="polite"></div>
 
-  <!-- Firebase config (optional, gitignored; app falls back to localStorage if missing) -->
-  <script src="firebase-config.js" onerror="void 0"></script>
+  <!-- Firebase config -->
+  <script>
+    window.firebaseConfig = {
+      apiKey:            "AIzaSyDxKZBN89t__HHpeXiCtXLmLlXSXCdYBJA",
+      authDomain:        "mandarin-flashcard-a1ac3.firebaseapp.com",
+      projectId:         "mandarin-flashcard-a1ac3",
+      storageBucket:     "mandarin-flashcard-a1ac3.firebasestorage.app",
+      messagingSenderId: "795357882034",
+      appId:             "1:795357882034:web:00432ffa2cc9c0f77f8bab",
+    };
+  </script>
 
   <script type="module" src="app.js?v=20260617-2"></script>
 </body>
