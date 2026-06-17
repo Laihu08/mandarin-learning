@@ -140,6 +140,32 @@ function formatDisplayPinyin(charText, rawPinyin) {
     .join(' / ');
 }
 
+function escapeHtml(text) {
+  return String(text)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function getFrontCharMarkup(charText) {
+  const parts = (charText || '').split('/').map(part => part.trim()).filter(Boolean);
+  const shouldStack = parts.length > 1 && (charText.length >= 6 || /[()/（）]/.test(charText));
+
+  if (!shouldStack) {
+    return {
+      html: escapeHtml(charText || ''),
+      stacked: false,
+    };
+  }
+
+  return {
+    html: parts.map(part => `<span class="char-line">${escapeHtml(part)}</span>`).join(''),
+    stacked: true,
+  };
+}
+
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -452,6 +478,7 @@ function renderCard() {
   const card = state.deck[state.index];
   if (!card) return;
   const displayPinyin = formatDisplayPinyin(card.char, card.pinyin);
+  const frontCharMarkup = getFrontCharMarkup(card.char);
 
   const levelMeta = LEVEL_META[state.level];
   const total     = state.deck.length;
@@ -465,7 +492,8 @@ function renderCard() {
     : `${known} / ${total} in ${levelMeta.zh}`;
 
   // Front
-  document.getElementById('front-char').textContent = card.char;
+  const frontChar = document.getElementById('front-char');
+  frontChar.innerHTML = frontCharMarkup.html;
   document.getElementById('front-pinyin').textContent = displayPinyin;
 
   const catEn  = catLabel(card.category);
@@ -478,9 +506,10 @@ function renderCard() {
   catBadge.innerHTML = categoryMarkup;
   document.getElementById('mobile-card-category').innerHTML = categoryMarkup;
   document.getElementById('mobile-card-pinyin').textContent = displayPinyin;
-  const frontChar = document.getElementById('front-char');
+  frontChar.classList.toggle('stacked', frontCharMarkup.stacked);
   frontChar.classList.toggle('compact', card.char.length >= 3);
   frontChar.classList.toggle('compact-wide', card.char.length >= 5 || card.char.includes('/'));
+  frontChar.classList.toggle('compact-tight', card.char.length >= 6 || /[()/（）]/.test(card.char));
 
   // Back
   document.getElementById('back-char').textContent    = card.char;

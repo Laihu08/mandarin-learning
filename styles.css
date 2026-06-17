@@ -730,6 +730,10 @@ button:focus-visible {
   max-width: 100%;
 }
 
+.char-line {
+  display: block;
+}
+
 @media (min-width: 640px) {
   .char-display {
     font-size: 120px;
@@ -864,7 +868,7 @@ button:focus-visible {
   }
 
   .card-front {
-    padding: 24px 92px 24px 24px;
+    padding: 24px 108px 24px 24px;
   }
 
   .mobile-card-category {
@@ -936,6 +940,17 @@ button:focus-visible {
   .char-display {
     font-size: clamp(60px, 18vw, 96px);
     line-height: 1;
+    max-width: 100%;
+  }
+
+  .char-display.stacked {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    white-space: normal;
+    line-height: 0.98;
   }
 
   .char-display.compact {
@@ -944,6 +959,11 @@ button:focus-visible {
 
   .char-display.compact-wide {
     font-size: clamp(34px, 10.8vw, 52px);
+  }
+
+  .char-display.compact-tight {
+    font-size: clamp(28px, 8.6vw, 42px);
+    letter-spacing: 0.01em;
   }
 }
 
