@@ -109,6 +109,7 @@ button {
   font-size: inherit;
   color: inherit;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 button:focus-visible {
@@ -652,6 +653,7 @@ button:focus-visible {
   transform-style: preserve-3d;
   transition: transform var(--flip-duration) var(--ease-flip);
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 @media (min-width: 640px) {
@@ -890,6 +892,7 @@ button:focus-visible {
   }
 
   .mobile-card-pinyin {
+    display: block;
     position: absolute;
     top: calc(100% + 8px);
     left: 50%;
@@ -1032,9 +1035,24 @@ button:focus-visible {
 }
 
 @media (max-width: 639px) {
+  .card-actions {
+    max-width: 100%;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .again-btn,
+  .known-btn {
+    height: 56px;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 14px;
+  }
+
   #next-btn:not(:disabled) {
     animation: nudge-right 1.6s ease-in-out infinite;
   }
+
   #prev-btn:not(:disabled) {
     animation: nudge-left 1.6s ease-in-out infinite;
   }

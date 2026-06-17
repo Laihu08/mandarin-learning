@@ -107,6 +107,39 @@ function expandPos(code) {
   }).join(' / ');
 }
 
+function formatDisplayPinyin(charText, rawPinyin) {
+  if (!rawPinyin) return '';
+
+  const cleanGroup = group => {
+    const alternatives = group.split(/\s*\/\s*/).map(part => part.trim()).filter(Boolean);
+    return alternatives[0] || '';
+  };
+
+  const charForms = (charText || '').split('/').map(part => part.trim()).filter(Boolean);
+  if (charForms.length > 1) {
+    const grouped = rawPinyin
+      .trim()
+      .split(/(?:\s+\/\s*|\/\s+)/)
+      .map(part => part.trim())
+      .filter(Boolean);
+
+    while (grouped.length > charForms.length) {
+      grouped[grouped.length - 2] = `${grouped[grouped.length - 2]}/${grouped[grouped.length - 1]}`;
+      grouped.pop();
+    }
+
+    if (grouped.length === charForms.length) {
+      return grouped.map(cleanGroup).join(' / ');
+    }
+  }
+
+  return rawPinyin
+    .split(/\s*\/\s*/)
+    .map(part => part.trim())
+    .filter(Boolean)
+    .join(' / ');
+}
+
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -418,6 +451,7 @@ function renderHome() {
 function renderCard() {
   const card = state.deck[state.index];
   if (!card) return;
+  const displayPinyin = formatDisplayPinyin(card.char, card.pinyin);
 
   const levelMeta = LEVEL_META[state.level];
   const total     = state.deck.length;
@@ -432,7 +466,7 @@ function renderCard() {
 
   // Front
   document.getElementById('front-char').textContent = card.char;
-  document.getElementById('front-pinyin').textContent = card.pinyin;
+  document.getElementById('front-pinyin').textContent = displayPinyin;
 
   const catEn  = catLabel(card.category);
   const subcatEn = catLabel(card.subcategory);
@@ -443,14 +477,14 @@ function renderCard() {
     : '';
   catBadge.innerHTML = categoryMarkup;
   document.getElementById('mobile-card-category').innerHTML = categoryMarkup;
-  document.getElementById('mobile-card-pinyin').textContent = card.pinyin;
+  document.getElementById('mobile-card-pinyin').textContent = displayPinyin;
   const frontChar = document.getElementById('front-char');
   frontChar.classList.toggle('compact', card.char.length >= 3);
   frontChar.classList.toggle('compact-wide', card.char.length >= 5 || card.char.includes('/'));
 
   // Back
   document.getElementById('back-char').textContent    = card.char;
-  document.getElementById('back-pinyin').textContent  = card.pinyin;
+  document.getElementById('back-pinyin').textContent  = displayPinyin;
   document.getElementById('back-english').textContent = card.english;
   document.getElementById('back-pos').textContent     = expandPos(card.pos);
 
@@ -489,6 +523,12 @@ function setPinyinVisible(val) {
   btn.classList.toggle('revealed', val);
   btn.innerHTML = val ? ICON.eyeOff : ICON.eye;
   btn.setAttribute('aria-label', val ? 'Hide pinyin' : 'Show pinyin');
+}
+
+function preventDoubleTapZoom(el) {
+  el.addEventListener('dblclick', e => {
+    e.preventDefault();
+  });
 }
 
 /* ── Navigation ──────────────────────────────────────────────────── */
@@ -723,9 +763,11 @@ function setupEvents() {
   // Theme toggle
   document.getElementById('theme-btn').addEventListener('click', cycleTheme);
 
-  // Card flip (tap on card-inner, excluding pinyin button)
+  // Card flip only when the card face itself is tapped
   const cardInner = document.getElementById('card-inner');
-  cardInner.addEventListener('click', () => {
+  cardInner.addEventListener('click', e => {
+    if (!e.target.closest('.card-face')) return;
+    if (e.target.closest('button')) return;
     setFlipped(!state.isFlipped);
   });
 
@@ -746,6 +788,16 @@ function setupEvents() {
   // Again / Known
   document.getElementById('again-btn').addEventListener('click', markAgain);
   document.getElementById('known-btn').addEventListener('click', markKnown);
+
+  // Guard mobile study controls against browser double-tap zoom.
+  [
+    cardInner,
+    pinyinBtn,
+    document.getElementById('prev-btn'),
+    document.getElementById('next-btn'),
+    document.getElementById('again-btn'),
+    document.getElementById('known-btn'),
+  ].forEach(preventDoubleTapZoom);
 
   // Swipe on card scene
   initSwipe(document.getElementById('card-scene'));
