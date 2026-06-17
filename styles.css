@@ -584,15 +584,17 @@ button:focus-visible {
 }
 
 /* ─────────────────────────────────────────────
-   Card + arrows row wrapper
+   Card + arrows: 3-column grid
+   col 1: prev btn | col 2: card | col 3: next btn
 ───────────────────────────────────────────── */
-.card-nav-wrap {
-  display: flex;
+.card-area {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 48px 1fr 48px;
   align-items: center;
   gap: 8px;
   width: 100%;
   max-width: 560px;
-  flex: 1;
 }
 
 /* ─────────────────────────────────────────────
@@ -623,13 +625,12 @@ button:focus-visible {
    Card scene (3D flip container)
 ───────────────────────────────────────────── */
 .card-scene {
-  flex: 1;
-  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   perspective: 1400px;
   padding: 8px 0;
+  min-width: 0;
 }
 
 .card-inner {
@@ -938,8 +939,11 @@ button:focus-visible {
 .nav-btn {
   width: 40px;
   height: 40px;
-  flex-shrink: 0;
+  justify-self: center;
   border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
   color: var(--text-2);
 }
 
@@ -954,7 +958,13 @@ button:focus-visible {
   pointer-events: none;
 }
 
-/* Mobile: gentle nudge animation on active nav buttons */
+.nav-btn:hover:not(:disabled) {
+  background: var(--accent-muted);
+  border-color: var(--accent-muted2);
+  color: var(--accent);
+}
+
+/* Mobile: gentle nudge to draw attention */
 @keyframes nudge-right {
   0%, 100% { transform: translateX(0); }
   50%       { transform: translateX(4px); }
@@ -969,24 +979,22 @@ button:focus-visible {
   #next-btn:not(:disabled) {
     animation: nudge-right 1.6s ease-in-out infinite;
   }
-
   #prev-btn:not(:disabled) {
     animation: nudge-left 1.6s ease-in-out infinite;
   }
 }
 
-/* Desktop: large centered arrows beside the card */
+/* Desktop: big arrows using the side space */
 @media (min-width: 640px) {
-  .card-nav-wrap {
-    max-width: 780px;
-    gap: 28px;
+  .card-area {
+    grid-template-columns: 88px 1fr 88px;
+    max-width: 720px;
+    gap: 16px;
   }
 
   .nav-btn {
     width: 80px;
     height: 80px;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
     box-shadow: var(--shadow);
   }
 
@@ -995,10 +1003,7 @@ button:focus-visible {
     height: 36px;
   }
 
-  .nav-btn:hover {
-    background: var(--accent-muted);
-    border-color: var(--accent-muted2);
-    color: var(--accent);
+  .nav-btn:hover:not(:disabled) {
     box-shadow: var(--shadow-lg);
   }
 }
