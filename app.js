@@ -272,51 +272,92 @@ async function saveToFirestore() {
   }
 }
 
+/* ── Welcome overlay ─────────────────────────────────────────────── */
+function showWelcomeOverlay() {
+  const el = document.getElementById('welcome-overlay');
+  el.classList.remove('hidden');
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('visible')));
+}
+
+function hideWelcomeOverlay() {
+  const el = document.getElementById('welcome-overlay');
+  el.classList.remove('visible');
+  setTimeout(() => el.classList.add('hidden'), 350);
+}
+
 /* ── Firebase init ───────────────────────────────────────────────── */
 async function initFirebase() {
-  if (!window.firebaseConfig) return;
+  if (!window.firebaseConfig) return 'no-firebase';
   try {
     const { initializeApp }                        = await import(`${FIREBASE_CDN}/firebase-app.js`);
     const { getAuth, GoogleAuthProvider,
             signInWithPopup, signOut,
             onAuthStateChanged }                   = await import(`${FIREBASE_CDN}/firebase-auth.js`);
+    const { getFirestore }                         = await import(`${FIREBASE_CDN}/firebase-firestore.js`);
 
     const app  = initializeApp(window.firebaseConfig);
     const auth = getAuth(app);
-    const { getFirestore }                         = await import(`${FIREBASE_CDN}/firebase-firestore.js`);
-    firebaseDb = getFirestore(app);
+    firebaseDb   = getFirestore(app);
     firebaseAuth = auth;
 
     const authBtn = document.getElementById('auth-btn');
     authBtn.classList.remove('hidden');
 
+    async function doSignIn() {
+      try {
+        const provider = new GoogleAuthProvider();
+        await signInWithPopup(auth, provider);
+      } catch (e) {
+        console.warn('Sign-in error', e);
+      }
+    }
+
     authBtn.addEventListener('click', async () => {
       if (currentUser) {
         await signOut(auth);
       } else {
-        try {
-          const provider = new GoogleAuthProvider();
-          await signInWithPopup(auth, provider);
-        } catch (e) {
-          console.warn('Sign-in error', e);
-        }
+        await doSignIn();
       }
     });
 
+    document.getElementById('welcome-google-btn')?.addEventListener('click', doSignIn);
+
+    // Get initial auth state from cache (fires immediately)
+    const initialUser = await new Promise(resolve => {
+      const unsub = onAuthStateChanged(auth, user => { unsub(); resolve(user); });
+    });
+
+    // Handle initial signed-in user
+    if (initialUser) {
+      currentUser = initialUser;
+      authBtn.textContent = initialUser.displayName?.split(' ')[0] || 'Account';
+      authBtn.classList.add('signed-in');
+      await loadFirestoreProgress(initialUser.uid);
+    }
+
+    // Ongoing listener for future sign-in / sign-out
     onAuthStateChanged(auth, async (user) => {
+      const wasSignedIn = !!currentUser;
       currentUser = user;
       if (user) {
-        authBtn.textContent = user.displayName?.split(' ')[0] || 'Sign out';
+        authBtn.textContent = user.displayName?.split(' ')[0] || 'Account';
         authBtn.classList.add('signed-in');
-        await loadFirestoreProgress(user.uid);
+        if (!wasSignedIn) {
+          hideWelcomeOverlay();
+          await loadFirestoreProgress(user.uid);
+          showSync(`Welcome, ${user.displayName?.split(' ')[0] || 'back'}!`);
+          renderHome();
+        }
       } else {
         authBtn.textContent = 'Sign in';
         authBtn.classList.remove('signed-in');
       }
-      renderHome();
     });
+
+    return initialUser ? 'signed-in' : 'signed-out';
   } catch (e) {
     console.warn('Firebase init error', e);
+    return 'no-firebase';
   }
 }
 
@@ -737,29 +778,31 @@ function cycleTheme() {
 
 /* ── Init ────────────────────────────────────────────────────────── */
 async function init() {
-  // Apply saved theme
   setTheme(getTheme());
 
-  // Load data
-  const [vocabRes, posRes] = await Promise.all([
-    fetch('data/vocabulary.json'),
-    fetch('data/pos.json'),
+  // Load vocab data and Firebase auth state in parallel
+  const [[vocabRes, posRes], authStatus] = await Promise.all([
+    Promise.all([fetch('data/vocabulary.json'), fetch('data/pos.json')]),
+    initFirebase().catch(() => 'no-firebase'),
   ]);
+
   vocab  = await vocabRes.json();
   posMap = await posRes.json();
 
-  // Load local progress
   loadLocal();
-
-  // Render
   renderHome();
   setupIcons();
   setupEvents();
 
-  // Firebase (optional)
-  initFirebase().catch(() => {});
+  // Guest button always available
+  document.getElementById('welcome-guest-btn')?.addEventListener('click', hideWelcomeOverlay);
 
-  // Fade out loader
+  // Show welcome screen only when Firebase is configured but user not signed in
+  if (authStatus === 'signed-out') {
+    showWelcomeOverlay();
+  }
+
+  // Fade out loading overlay
   const loader = document.getElementById('loading-overlay');
   loader.classList.add('fade-out');
   setTimeout(() => loader.remove(), 400);
