@@ -444,7 +444,9 @@ function renderCard() {
   catBadge.innerHTML = categoryMarkup;
   document.getElementById('mobile-card-category').innerHTML = categoryMarkup;
   document.getElementById('mobile-card-pinyin').textContent = card.pinyin;
-  document.getElementById('front-char').classList.toggle('compact', card.char.length >= 3);
+  const frontChar = document.getElementById('front-char');
+  frontChar.classList.toggle('compact', card.char.length >= 3);
+  frontChar.classList.toggle('compact-wide', card.char.length >= 5 || card.char.includes('/'));
 
   // Back
   document.getElementById('back-char').textContent    = card.char;
