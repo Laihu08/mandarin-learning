@@ -314,7 +314,9 @@ async function initFirebase() {
 
     authBtn.addEventListener('click', async () => {
       if (currentUser) {
-        await signOut(auth);
+        if (confirm('Sign out of your account?')) {
+          await signOut(auth);
+        }
       } else {
         await doSignIn();
       }
