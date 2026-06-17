@@ -1,0 +1,21 @@
+{
+  "N": "Noun",
+  "V": "Action verb",
+  "VS": "State verb",
+  "ADV": "Adverb",
+  "Conj": "Conjunction",
+  "Prep": "Preposition",
+  "M": "Measure word",
+  "Det": "Determiner",
+  "Num": "Numeral",
+  "Particle": "Particle",
+  "Affix": "Affix",
+  "Asp": "Aspect marker",
+  "Pron": "Pronoun",
+  "Ptc": "Particle",
+  "BA": "Ba-construction",
+  "Bei": "Passive marker",
+  "Adv": "Adverb",
+  "affix": "Affix",
+  "particle": "Particle"
+}
