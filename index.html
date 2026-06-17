@@ -58,34 +58,37 @@
     <div class="card-area">
       <button class="action-btn nav-btn" id="prev-btn" aria-label="Previous card" title="Previous (←)"></button>
 
-      <div class="card-scene" id="card-scene" aria-label="Flashcard">
-        <div class="card-inner" id="card-inner" role="button" tabindex="0" aria-label="Tap to flip card">
+      <div class="card-column">
+        <div class="card-scene" id="card-scene" aria-label="Flashcard">
+          <div class="card-inner" id="card-inner" role="button" tabindex="0" aria-label="Tap to flip card">
 
-          <!-- Front face -->
-          <div class="card-face card-front" aria-hidden="false">
-            <div class="front-category-badge" id="front-category" aria-label="Category"></div>
-            <div class="char-display" id="front-char" lang="zh-Hant"></div>
-            <div class="front-pinyin" id="front-pinyin" aria-live="polite"></div>
-            <div class="pinyin-hint" id="pinyin-hint">
-              <span class="hint-text">tap to reveal pinyin</span>
-              <span class="hint-arrow">&#8594;</span>
+            <!-- Front face -->
+            <div class="card-face card-front" aria-hidden="false">
+              <div class="front-category-badge" id="front-category" aria-label="Category"></div>
+              <div class="char-display" id="front-char" lang="zh-Hant"></div>
+              <div class="front-pinyin" id="front-pinyin" aria-live="polite"></div>
+              <button class="pinyin-btn" id="pinyin-btn" aria-label="Show pinyin"></button>
             </div>
-            <button class="pinyin-btn" id="pinyin-btn" aria-label="Show pinyin"></button>
-          </div>
 
-          <!-- Back face -->
-          <div class="card-face card-back" aria-hidden="true">
-            <div class="back-char" id="back-char" lang="zh-Hant"></div>
-            <div class="back-pinyin" id="back-pinyin"></div>
-            <div class="back-english" id="back-english" lang="en"></div>
-            <div class="back-meta">
-              <span class="pos-badge" id="back-pos"></span>
-              <div class="back-category" id="back-category"></div>
+            <!-- Back face -->
+            <div class="card-face card-back" aria-hidden="true">
+              <div class="back-char" id="back-char" lang="zh-Hant"></div>
+              <div class="back-pinyin" id="back-pinyin"></div>
+              <div class="back-english" id="back-english" lang="en"></div>
+              <div class="back-meta">
+                <span class="pos-badge" id="back-pos"></span>
+                <div class="back-category" id="back-category"></div>
+              </div>
             </div>
-          </div>
 
+          </div>
+        </div><!-- /card-scene -->
+
+        <div class="pinyin-hint" id="pinyin-hint">
+          <span class="hint-arrow" aria-hidden="true">&#8593;</span>
+          <span class="hint-text">tap to reveal pinyin</span>
         </div>
-      </div><!-- /card-scene -->
+      </div>
 
       <button class="action-btn nav-btn" id="next-btn" aria-label="Next card" title="Next (→)"></button>
     </div><!-- /card-area -->
